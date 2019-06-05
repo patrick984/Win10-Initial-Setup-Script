@@ -2635,7 +2635,188 @@ Function EnableThumbsDBOnNetwork {
 #endregion Explorer UI Tweaks
 ##########
 
+##########
+#region Additional Explorer UI Tweaks
+##########
 
+# Show the Recycle Bin in the File Explorer sidebar
+Function ShowRecycleBinInFileExplorer {
+    Write-Host "Showing Recycle Bin in File Explorer Sidebar..."
+    If (!(Test-Path "HKCU:\Software\Classes\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}")) {
+        New-Item -Path "HKCU:\Software\Classes\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}" -Force | Out-Null
+    }
+    Set-ItemProperty -Path "HKCU:\Software\Classes\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}" -Name "System.IsPinnedToNameSpaceTree" -Type DWord -Value 1
+}
+
+# Don't Show the Recycle Bin in the File Explorer sidebar
+Function HideRecycleBinFromFileExplorer {
+    Write-Host "Hiding Recycle Bin from File Explorer Sidebar..."
+    Remove-ItemProperty -Path "HKCU:\Software\Classes\CLSID\{645FF040-5081-101B-9F08-00AA002F954E}" -Name "System.IsPinnedToNameSpaceTree" -ErrorAction SilentlyContinue
+}
+
+# Add "Open Command prompt here" to context menu
+Function AddOpenCmdContext {
+    Write-Host "Adding 'Open Command window here' to context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+
+    New-Item -Path "HKCR:\Directory\Background\shell\cmdcon" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Directory\Background\shell\cmdcon" -Name "(Default)" -Type String -Value "@shell32.dll,-8506"
+    Set-ItemProperty -Path "HKCR:\Directory\Background\shell\cmdcon" -Name "NoWorkingDirectory" -Type String  -Value ""
+    Set-ItemProperty -Path "HKCR:\Directory\Background\shell\cmdcon" -Name "Icon" -Type String -Value "C:\\Windows\\System32\\cmd.exe"
+    Remove-ItemProperty -Path "HKCR:\Directory\Background\shell\cmdcon" -Name "Extended" -ErrorAction SilentlyContinue
+
+    New-Item -Path "HKCR:\Directory\Background\shell\cmdcon\command" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Directory\Background\shell\cmdcon\command" -Name "(Default)" -Type String -Value "cmd.exe /s /k pushd `"%V`" & title Command Prompt"
+
+    New-Item -Path "HKCR:\Directory\shell\cmdcon" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Directory\shell\cmdcon" -Name "(Default)" -Type String -Value "@shell32.dll,-8506"
+    Set-ItemProperty -Path "HKCR:\Directory\shell\cmdcon" -Name "NoWorkingDirectory" -Type String -Value ""
+    Set-ItemProperty -Path "HKCR:\Directory\shell\cmdcon" -Name "Icon" -Type String -Value "C:\\Windows\\System32\\cmd.exe"
+    Remove-ItemProperty -Path "HKCR:\Directory\shell\cmdcon" -Name "Extended" -ErrorAction SilentlyContinue
+
+    New-Item -Path "HKCR:\Directory\shell\cmdcon\command" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Directory\shell\cmdcon\command" -Name "(Default)" -Type String -Value "cmd.exe /s /k pushd `"%V`" & title Command Prompt"
+
+    New-Item -Path "HKCR:\Drive\shell\cmdcon" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Drive\shell\cmdcon" -Name "(Default)" -Type String -Value "@shell32.dll,-8506"
+    Set-ItemProperty -Path "HKCR:\Drive\shell\cmdcon" -Name "NoWorkingDirectory" -Type String -Value ""
+    Set-ItemProperty -Path "HKCR:\Drive\shell\cmdcon" -Name "Icon" -Type String -Value "C:\\Windows\\System32\\cmd.exe"
+    Remove-ItemProperty -Path "HKCR:\Drive\shell\cmdcon" -Name "Extended" -ErrorAction SilentlyContinue
+
+    New-Item -Path "HKCR:\Drive\shell\cmdcon\command" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Drive\shell\cmdcon\command" -Name "(Default)" -Type String -Value "cmd.exe /s /k pushd `"%V`" & title Command Prompt"
+}
+
+# Remove "Open command prompt here" from context menu
+Function RemoveOpenCmdContext {
+    Write-Host "Removing 'Open Command window here' from context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+
+    Remove-Item -Path "HKCR:\Directory\Background\shell\cmdcon" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "HKCR:\Directory\shell\cmdcon" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "HKCR:\Drive\shell\cmdcon" -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# Add "Open PowerShell here" to context menu
+Function AddOpenPowerShellContext {
+    Write-Host "Adding 'Open PowerShell here' to context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+
+    New-Item -Path "HKCR:\Directory\Background\shell\Open PowerShell here" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Directory\Background\shell\Open PowerShell here" -Name "(Default)" -Type String -Value "Open PowerShell here"
+    Set-ItemProperty -Path "HKCR:\Directory\Background\shell\Open PowerShell here" -Name "NoWorkingDirectory" -Type String  -Value ""
+    Set-ItemProperty -Path "HKCR:\Directory\Background\shell\Open PowerShell here" -Name "Icon" -Type String -Value "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    Remove-ItemProperty -Path "HKCR:\Directory\Background\shell\Open PowerShell here" -Name "Extended" -ErrorAction SilentlyContinue
+
+    New-Item -Path "HKCR:\Directory\Background\shell\Open PowerShell here\command" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Directory\Background\shell\Open PowerShell here\command" -Name "(Default)" -Type String -Value "powershell.exe -noexit -command Set-Location -literalPath '%V'"
+
+    New-Item -Path "HKCR:\Directory\shell\Open PowerShell here" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Directory\shell\Open PowerShell here" -Name "(Default)" -Type String -Value "Open PowerShell here"
+    Set-ItemProperty -Path "HKCR:\Directory\shell\Open PowerShell here" -Name "NoWorkingDirectory" -Type String -Value ""
+    Set-ItemProperty -Path "HKCR:\Directory\shell\Open PowerShell here" -Name "Icon" -Type String -Value "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    Remove-ItemProperty -Path "HKCR:\Directory\shell\Open PowerShell here" -Name "Extended" -ErrorAction SilentlyContinue
+
+    New-Item -Path "HKCR:\Directory\shell\Open PowerShell here\command" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Directory\shell\Open PowerShell here\command" -Name "(Default)" -Type String -Value "powershell.exe -noexit -command Set-Location -literalPath '%V'"
+
+    New-Item -Path "HKCR:\Drive\shell\Open PowerShell here" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Drive\shell\Open PowerShell here" -Name "(Default)" -Type String -Value "Open PowerShell here"
+    Set-ItemProperty -Path "HKCR:\Drive\shell\Open PowerShell here" -Name "NoWorkingDirectory" -Type String -Value ""
+    Set-ItemProperty -Path "HKCR:\Drive\shell\Open PowerShell here" -Name "Icon" -Type String -Value "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+    Remove-ItemProperty -Path "HKCR:\Drive\shell\Open PowerShell here" -Name "Extended" -ErrorAction SilentlyContinue
+
+    New-Item -Path "HKCR:\Drive\shell\Open PowerShell here\command" -Force | Out-Null
+    Set-ItemProperty -Path "HKCR:\Drive\shell\Open PowerShell here\command" -Name "(Default)" -Type String -Value "powershell.exe -noexit -command Set-Location -literalPath '%V'"
+}
+
+# Remove "Open PowerShell here" from context menu
+Function RemoveOpenPowerShellContext {
+    Write-Host "Removing 'Open PowerShell here' from context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+
+    Remove-Item -Path "HKCR:\Directory\Background\shell\Open PowerShell here" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "HKCR:\Directory\shell\Open PowerShell here" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "HKCR:\Drive\shell\Open PowerShell here" -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+# Add Batch file to File Explorer "New" context menu
+Function AddBatchToNewFileMenu {
+    Write-Host "Adding Batch file to File Explorer 'new' context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+    If (!(Test-Path "HKCR:\.bat\ShellNew")) {
+        New-Item -Path "HKCR:\.bat\ShellNew" -Force | Out-Null
+    }
+    Set-ItemProperty -Path "HKCR:\.bat\ShellNew" -Name "NullFile" -Type String -Value ""
+    Set-ItemProperty -Path "HKCR:\.bat\ShellNew" -Name "ItemName" -Type ExpandString -Value "@%SystemRoot%\System32\acppage.dll,-6002"
+}
+
+# Remove Batch file from File Explorer "New" context menu
+Function RemoveBatchFromNewFileMenu {
+    Write-Host "Removing Batch file from File Explorer 'new' context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+    Remove-ItemProperty -Path "HKCR:\.bat\ShellNew" -Name "NullFile" -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path "HKCR:\.bat\ShellNew" -Name "ItemName" -ErrorAction SilentlyContinue
+}
+
+# Add PowerShell file to File Explorer "New" context menu
+Function AddPowerShellToNewFileMenu {
+    Write-Host "Adding PowerShell file to File Explorer 'new' context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+    If (!(Test-Path "HKCR:\.ps1\ShellNew")) {
+        New-Item -Path "HKCR:\.ps1\ShellNew" -Force | Out-Null
+    }
+    Set-ItemProperty -Path "HKCR:\.ps1\ShellNew" -Name "NullFile" -Type String -Value ""
+}
+
+# Remove PowerShell file from File Explorer "New" context menu
+Function RemovePowerShellFromNewFileMenu {
+    Write-Host "Removing PowerShell file from File Explorer 'new' context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+    Remove-ItemProperty -Path "HKCR:\.ps1\ShellNew" -Name "NullFile" -ErrorAction SilentlyContinue
+}
+
+Function SetImprovedConsoleColors {
+    Write-Output "Setting improved console colour scheme..."
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable00" -Type DWord -Value 0x00423937
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable01" -Type DWord -Value 0x00bc8400
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable02" -Type DWord -Value 0x004fa14f
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable03" -Type DWord -Value 0x00b39609
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable04" -Type DWord -Value 0x004956e4
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable05" -Type DWord -Value 0x00a425a6
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable06" -Type DWord -Value 0x000084c0
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable07" -Type DWord -Value 0x00fafafa
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable08" -Type DWord -Value 0x005d524f
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable09" -Type DWord -Value 0x00efaf61
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable10" -Type DWord -Value 0x0079c398
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable11" -Type DWord -Value 0x00c1b556
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable12" -Type DWord -Value 0x00756cdf
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable13" -Type DWord -Value 0x00dd77c5
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable14" -Type DWord -Value 0x007ac0e4
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable15" -Type DWord -Value 0x00ffffff
+    Set-ItemProperty -Path "HKCU:\Console" -Name "ScreenColors" -Type DWord -Value 0x00000070
+    Set-ItemProperty -Path "HKCU:\Console" -Name "PopupColors" -Type DWord -Value 0x00000075
+}
+
+##########
+#endregion Additional Explorer UI Tweaks
+##########
 
 ##########
 #region Application Tweaks
