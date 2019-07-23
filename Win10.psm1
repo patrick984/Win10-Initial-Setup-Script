@@ -2792,6 +2792,27 @@ Function RemovePowerShellFromNewFileMenu {
     Remove-ItemProperty -Path "HKCR:\.ps1\ShellNew" -Name "NullFile" -ErrorAction SilentlyContinue
 }
 
+# Add INI (Config) file to File Explorer "New" context menu
+Function AddIniToNewFileMenu {
+	Write-Output "Adding INI file to File Explorer 'new' context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+    If (!(Test-Path "HKCU:\Software\Classes\.ini\ShellNew")) {
+        New-Item -Path "HKCU:\Software\Classes\.ini\ShellNew" -Force | Out-Null
+    }
+    Set-ItemProperty -Path "HKCU:\Software\Classes\.ini\ShellNew" -Name "NullFile" -Type String -Value ""
+}
+
+# Remove INI (Config) file from File Explorer "New" context menu
+Function RemoveINIFromNewFileMenu {
+    Write-Host "Removing INI file from File Explorer 'new' context menu..."
+    If (!(Test-Path "HKCR:")) {
+        New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+    }
+    Remove-ItemProperty -Path "HKCR:\.ini\ShellNew" -Name "NullFile" -ErrorAction SilentlyContinue
+}
+
 Function SetImprovedConsoleColors {
     Write-Output "Setting improved console colour scheme..."
     Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable00" -Type DWord -Value 0x00423937
@@ -2812,6 +2833,12 @@ Function SetImprovedConsoleColors {
     Set-ItemProperty -Path "HKCU:\Console" -Name "ColorTable15" -Type DWord -Value 0x00ffffff
     Set-ItemProperty -Path "HKCU:\Console" -Name "ScreenColors" -Type DWord -Value 0x00000070
     Set-ItemProperty -Path "HKCU:\Console" -Name "PopupColors" -Type DWord -Value 0x00000075
+}
+
+# Enable Mouse Pointer Shadow
+Function EnablePointerShadow {
+	Write-Output "Enable mouse pointer shadow..."
+	Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Value ([byte[]](0x9E, 0x3E, 0x07, 0x80, 0x12, 0x00, 0x00, 0x00)) -Type Binary -Force
 }
 
 ##########

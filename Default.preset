@@ -87,7 +87,7 @@ EnableNTFSLongPaths             # DisableNTFSLongPaths
 # EnableHibernation             # DisableHibernation
 # DisableSleepButton            # EnableSleepButton
 # DisableSleepTimeout           # EnableSleepTimeout
-# DisableFastStartup            # EnableFastStartup
+EnableFastStartup                    # DisableFastStartup
 # DisableAutoRebootOnCrash      # EnableAutoRebootOnCrash
 
 ### UI Tweaks ###
@@ -175,8 +175,10 @@ Hide3DObjectsFromThisPC         # Show3DObjectsInThisPC
 ShowRecycleBinInFileExplorer          # HideRecycleBinFromFileExplorer
 AddBatchToNewFileMenu              # RemoveBatchFromNewFileMenu
 AddPowerShellToNewFileMenu           # RemovePowerShellFromNewFileMenu
+AddIniToNewFileMenu           # RemoveINIFromNewFileMenu
 RemoveOpenCmdContext         # AddOpenCmdContext
 SetImprovedConsoleColors      # not reversible
+EnablePointerShadow      # not reversible
 
 ### Application Tweaks ###
 DisableOneDrive                 # EnableOneDrive
